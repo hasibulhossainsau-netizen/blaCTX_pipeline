@@ -1,0 +1,119 @@
+# =============================================================================
+# Unified config.yaml - Klebsiella pneumoniae AMR Genomics & Phylogenomics Pipeline
+# Lead: Md. Hasibul Hossain (Sukanto), SAU Microbiology & Parasitology
+# =============================================================================
+
+samples_tsv: "config/samples.tsv"
+results_dir: "results"
+logs_dir: "logs"
+
+gff_dir: "results/07_annotations/gff"
+assembly_dir: "results/04_filtered_assemblies"
+
+paths:
+  raw_reads_dir: "results/00_raw_reads"
+  fastqc_raw_dir: "results/01_qc/fastqc_raw"
+  trimmed_dir: "results/01_qc/trimmed"
+  fastqc_trimmed_dir: "results/01_qc/fastqc_trimmed"
+  assembly_dir: "results/02_assembly"
+  busco_dir: "results/03_busco"
+  filtered_assembly_dir: "results/04_filtered_assemblies"
+  amr_rgi_dir: "results/05_amr/rgi"
+  amr_resfinder_dir: "results/05_amr/resfinder"
+  metadata_dir: "results/06_metadata"
+  gff_dir: "results/07_annotations/gff"
+  phylogenomics_dir: "results/08_phylogenomics"
+  selection_dir: "results/09_selection"
+  logs_dir: "logs"
+
+databases:
+  busco_lineage: "resources/busco_db/enterobacterales_odb10"
+  card_json: "resources/card_data/card.json"
+  resfinder_db: "resources/resfinder/db_resfinder"
+  adapters_pe: "resources/adapters/NexteraPE-PE.fa"
+  adapters_se: "resources/adapters/TruSeq3-SE.fa"
+  bakta_db: "resources/db-light"
+
+thresholds:
+  busco_completeness_min: 95.0
+  coverage_min: 50.0
+  max_contigs_core: 200
+  min_contig_length: 500
+
+params:
+  threads: 8
+  trimmomatic:
+    java_opts: "-Xmx8g"
+    leading: 3
+    trailing: 3
+    slidingwindow: "4:20"
+    minlen: 50
+  shovill:
+    ram: 10
+  spades_mode: "--isolate"
+  target_amr_gene: "blaCTX-M-15"
+  rgi_alignment_tool: "BLAST"
+  resfinder_species: "Klebsiella"
+  entrez_email: "${NCBI_EMAIL}"
+  entrez_api_key: "${NCBI_API_KEY}"
+
+roary:
+  identity: 95
+  threads: 16
+  extra_args: "-e -n -v"
+
+gubbins:
+  threads: 16
+  iterations: 5
+  tree_builder: "raxml"
+
+raxml:
+  model: "GTR+G"
+  bootstraps: 1000
+  bs_method: "fbp"
+  threads: 16
+  seed: 42
+
+target_loci:
+  blaCTX-M-15:
+    query_fasta: "resources/references/blaCTX-M-15.fasta"
+    flank_bp: 500
+    feature_type: "cds"
+  rpoB:
+    query_fasta: "resources/references/rpoB.fasta"
+    flank_bp: 0
+    feature_type: "cds"
+  fusA:
+    query_fasta: "resources/references/fusA.fasta"
+    flank_bp: 0
+    feature_type: "cds"
+  ompK35:
+    query_fasta: "resources/references/ompK35.fasta"
+    flank_bp: 0
+    feature_type: "cds"
+  ompK36:
+    query_fasta: "resources/references/ompK36.fasta"
+    flank_bp: 0
+    feature_type: "cds"
+
+codon_align:
+  method: "macse"
+  threads: 8
+
+codeml:
+  binary: "codeml"
+  models: ["M0", "M1a", "M2a", "M7", "M8"]
+  seqtype: 1
+  runmode: 0
+  cleandata: 1
+
+hyphy:
+  binary: "hyphy"
+  methods: ["SLAC", "MEME"]
+  slac_pvalue: 0.1
+  meme_pvalue: 0.1
+
+selection_thresholds:
+  positive_dnds: 1.0
+  lrt_pvalue: 0.05
+  bayes_eb_posterior: 0.95
