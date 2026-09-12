@@ -59,16 +59,16 @@ nextflow run main.nf \
 
  Note: To inspect standalone Python script contracts, run python workflow/scripts/<script_name>.py --help. 
 
-## Follow Along Example & Expected Output
-To test the pipeline with the provided example manifest (config/samples.tsv):
-1. Run the pipeline using the Quick Start command above.
-2. Verify Results: Upon completion, the pipeline generates the primary aggregated summary files under results/06_metadata/:
+## Follow-Along Example & Expected Output
 
-i. results/06_metadata/cohort_metadata_summary.tsv
-ii. results/06_metadata/cohort_metadata_summary.xlsx
+To test the pipeline with the provided example manifest (`config/samples.tsv`):
 
-You can compare your results with our expected output. We provide reference output files in results/expected_output/ for pipeline output validation. 
+1. **Run the pipeline** using the Quick Start command above.
+2. **Verify Results:** Upon completion, the pipeline generates the primary aggregated summary files under `results/06_metadata/`:
+   - `results/06_metadata/cohort_metadata_summary.tsv`
+   - `results/06_metadata/cohort_metadata_summary.xlsx`
 
+You can compare your results with our expected output. We provide reference output files in `results/expected_output/` for pipeline output validation.
 ## Outputs
 
 | Directory | Contents |
