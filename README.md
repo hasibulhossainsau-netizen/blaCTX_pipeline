@@ -68,7 +68,8 @@ Place the databases under:
 resources/
 ├── busco_db/
 ├── card/
-└── resfinder
+├── adapter/ NexteraPE-PE.fa
+└── resfinder/
 ```
 
 ## Setup & Credentials 
