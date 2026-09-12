@@ -27,7 +27,8 @@ graph TD
     I -- Passing Assemblies --> K(RESFINDER)
     A & H & J & K --> L(SUMMARY)
     L --> M[cohort_metadata_summary.tsv]
-    L --> N[cohort_metadata_summary.xlsx]
+    L --> N[cohort_metadata_summary.xlsx] 
+``` 
 
 ## Prerequisites
 
