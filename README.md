@@ -13,6 +13,22 @@ The pipeline automates raw read processing, assembly, quality filtering, and dua
 4. **AMR Screening:** Screens passing assemblies using **RGI/CARD** and **ResFinder**.
 5. **Report:** Generates a unified cohort-level metadata summary (`TSV` / `XLSX`).
 
+```mermaid
+graph TD
+    A[config/samples.tsv] --> B(FETCH_SRA)
+    B --> C(FASTQC_RAW)
+    B --> D(TRIMMOMATIC)
+    D --> E(ASSEMBLY)
+    E --> F(BUSCO)
+    D & E --> G(COVERAGE)
+    E & F & G --> H(FILTER_ASSEMBLY)
+    H -- Pass Status --> I(PROMOTE)
+    I -- Passing Assemblies --> J(RGI / CARD)
+    I -- Passing Assemblies --> K(RESFINDER)
+    A & H & J & K --> L(SUMMARY)
+    L --> M[cohort_metadata_summary.tsv]
+    L --> N[cohort_metadata_summary.xlsx]
+
 ## Prerequisites
 
 - **OS:** Linux / WSL2
