@@ -63,8 +63,10 @@ nextflow run main.nf \
 To test the pipeline with the provided example manifest (config/samples.tsv):
 1. Run the pipeline using the Quick Start command above.
 2. Verify Results: Upon completion, the pipeline generates the primary aggregated summary files under results/06_metadata/:
+
 i. results/06_metadata/cohort_metadata_summary.tsv
 ii. results/06_metadata/cohort_metadata_summary.xlsx
+
 You can compare your results with our expected output. We provide reference output files in results/expected_output/ for pipeline output validation. 
 
 ## Outputs
