@@ -62,6 +62,14 @@ The pipeline requires specific reference databases placed under the `resources/`
 | **BUSCO Lineage** | Lineage Dataset for Genome Assessment | `enterobacterales_odb10` (OrthoDB v10.1) | `resources/busco_db` |
 
 > **Note:** Ensure database paths in `main.nf` or `nextflow.config` match your local directory setup before executing runs.
+Place the databases under:
+
+```text
+resources/
+├── busco_db/
+├── card/
+└── resfinder
+```
 
 ## Setup & Credentials 
 
