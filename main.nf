@@ -5,7 +5,7 @@ params.results     = 'results'
 params.threads     = 10
 params.target_gene = 'blaCTX-M-15'
 
-// Database path-গুলোকে projectDir দিয়ে Absolute করা হলো
+// Database path
 params.card_json    = "${projectDir}/resources/card_data/card.json"
 params.resfinder_db = "${projectDir}/resources/resfinder/db_resfinder"
 
@@ -276,13 +276,11 @@ process SUMMARY {
     """
     shopt -s nullglob
     
-    # RGI ফাইলগুলো সাজানো
     mkdir -p rgi_dir
     for result in *.rgi.txt; do
         mv "\${result}" rgi_dir/
     done
 
-    # ResFinder ফাইলগুলো সাজানো
     mkdir -p resfinder_dir
     for result in *.ResFinder_results.txt; do
         sample=\${result%.ResFinder_results.txt}
@@ -312,9 +310,11 @@ workflow {
         .fromPath(params.samples, checkIfExists: true)
         .splitCsv(header: true, sep: '\t')
         .map { row ->
-            def sample = row.sample_id?.toString()?.trim()
+            // sample_id হিসেবে 'sample_id' অথবা 'Run' আইডি ব্যবহার করা হবে
+            def sample = row.sample_id?.toString()?.trim() ?: row.Run?.toString()?.trim()
             def layout = row.source_type?.toString()?.trim()
-            def accession = row.sra_accession?.toString()?.trim()
+            def accession = row.sra_accession?.toString()?.trim() ?: row.Run?.toString()?.trim()
+            
             if (!sample || !accession || !['SRA_PE', 'PE'].contains(layout)) {
                 error "Unsupported or incomplete sample row: sample_id=${sample}, source_type=${layout}, sra_accession=${accession}"
             }

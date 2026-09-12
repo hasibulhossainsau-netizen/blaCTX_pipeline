@@ -9,21 +9,6 @@ validate_assemblies.py
 3. `build-summary` - aggregate filter status + RGI + ResFinder results for the
                       whole cohort into a single pandas DataFrame, exported as
                       TSV + XLSX, with target gene presence/absence flagged.
-
-Usage:
-  python validate_assemblies.py filter-one --sample-id KPN001 --fasta assembly.fasta \
-      --busco-summary short_summary.specific.txt --coverage-file coverage.txt \
-      --busco-min 95 --coverage-min 50 --max-contigs 2 --min-contig-len 500 \
-      --outdir results/04_filtered_assemblies --status-json KPN001.filter_status.json
-
-  python validate_assemblies.py promote --status-json KPN001.filter_status.json \
-      --fasta assembly.fasta --output KPN001.pass.fasta
-
-  python validate_assemblies.py build-summary --samples-tsv config/samples.tsv \
-      --filter-dir results/04_filtered_assemblies --rgi-dir results/05_amr/rgi \
-      --resfinder-dir results/05_amr/resfinder --target-gene blaCTX-M-15 \
-      --out-tsv results/06_metadata/cohort_metadata_summary.tsv \
-      --out-xlsx results/06_metadata/cohort_metadata_summary.xlsx
 """
 
 import argparse
@@ -159,7 +144,19 @@ def cmd_build_summary(args) -> None:
     records = []
 
     for _, row in samples_df.iterrows():
-        sample_id = str(row["sample_id"])
+        # sample_id হিসেবে 'sample_id' অথবা 'Run' কলাম ব্যবহার করা হচ্ছে
+        raw_sample = row.get("sample_id") if pd.notna(row.get("sample_id")) else row.get("Run")
+        sample_id = str(raw_sample).strip() if raw_sample is not None else ""
+
+        if not sample_id:
+            continue
+
+        # কলাম ম্যাপিং (config/samples.tsv এর কলামগুলোর সাথে নতুন কলামের ম্যাপিং)
+        biosample = row.get("biosample") if pd.notna(row.get("biosample")) else row.get("BioSample", "NA")
+        country = row.get("country") if pd.notna(row.get("country")) else row.get("geo_loc_name_country", "NA")
+        collection_year = row.get("collection_year") if pd.notna(row.get("collection_year")) else row.get("collection_date", "NA")
+        expected_st = row.get("expected_st") if pd.notna(row.get("expected_st")) else row.get("strain", "NA")
+        source_type = row.get("source_type", "NA")
 
         status_path = args.filter_dir / f"{sample_id}.filter_status.json"
         status = json.loads(status_path.read_text()) if status_path.exists() else {}
@@ -180,11 +177,11 @@ def cmd_build_summary(args) -> None:
 
         records.append({
             "sample_id": sample_id,
-            "biosample": row.get("biosample", "NA"),
-            "country": row.get("country", "NA"),
-            "collection_year": row.get("collection_year", "NA"),
-            "expected_st": row.get("expected_st", "NA"),
-            "source_type": row.get("source_type", "NA"),
+            "biosample": biosample,
+            "country": country,
+            "collection_year": collection_year,
+            "expected_st": expected_st,
+            "source_type": source_type,
             "busco_completeness": status.get("busco_completeness"),
             "coverage_x": status.get("coverage_x"),
             "n_contigs": status.get("n_contigs"),

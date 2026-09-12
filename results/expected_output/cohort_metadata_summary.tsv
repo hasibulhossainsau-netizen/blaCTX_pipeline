@@ -1,0 +1,3 @@
+sample_id	biosample	country	collection_year	expected_st	source_type	busco_completeness	coverage_x	n_contigs	total_assembly_length	qc_pass	qc_fail_reasons	blaCTX-M-15_rgi_detected	blaCTX-M-15_rgi_identity	blaCTX-M-15_resfinder_detected	blaCTX-M-15_resfinder_identity	blaCTX-M-15_concordant_call
+SRR25276878	SAMN36448984	Bangladesh	2022-10-20	MNH_G2C5F	SRA_PE	98.9	85.89	71	5390038	True	no_status_file	False		False		False
+SRR38361580	SAMN57562819	India	2024		SRA_PE	98.6	81.18	78	5518281	True	no_status_file	True	100.0	True	100.00	True
