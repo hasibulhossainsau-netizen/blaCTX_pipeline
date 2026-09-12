@@ -51,6 +51,18 @@ graph TD
 ├── resources/                 # Local reference DBs
 ```
 
+## Reference Databases
+
+The pipeline requires specific reference databases placed under the `resources/` directory:
+
+| Database / Resource | Dataset / Target | Version / Release Info | Local Path |
+| :--- | :--- | :--- | :--- |
+| **CARD** | Comprehensive Antibiotic Resistance Database | v4.0.2 | `resources/card_data/card.json` |
+| **ResFinder DB** | Acquired Antimicrobial Resistance Genes | Commit [`eecf0aa`](https://bitbucket.org/genomicepidemiology/resfinder_db) (Jan 2026) | `resources/resfinder/db_resfinder` |
+| **BUSCO Lineage** | Lineage Dataset for Genome Assessment | `enterobacterales_odb10` (OrthoDB v10.1) | `resources/busco_db` |
+
+> **Note:** Ensure database paths in `main.nf` or `nextflow.config` match your local directory setup before executing runs.
+
 ## Setup & Credentials 
 
 Before running, export your NCBI credentials for metadata fetching: 
