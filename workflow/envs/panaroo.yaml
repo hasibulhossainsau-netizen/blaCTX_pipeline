@@ -1,0 +1,7 @@
+name: panaroo_env
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - panaroo>=1.5
+  - mafft

@@ -1,0 +1,7 @@
+name: gubbins_env
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - gubbins>=3.3
+  - fasttree

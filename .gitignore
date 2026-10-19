@@ -1,0 +1,9 @@
+work/
+.nextflow*
+results_test/
+.conda_cache/
+resources/
+__pycache__/
+/results/*
+!/results/expected_output/
+CLAUDE.md
