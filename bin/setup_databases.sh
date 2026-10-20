@@ -26,7 +26,13 @@ done
 
 log() { printf '[setup_databases] %s\n' "$*"; }
 need() { command -v "$1" >/dev/null || { log "missing required tool: $1"; exit 1; }; }
-skip() { [[ -e "$1" && $FORCE -eq 0 ]] && { log "$2 present ($1); use -f to refresh"; return 0; } || return 1; }
+skip() {
+  if [[ -e "$1" && $FORCE -eq 0 ]]; then
+    log "$2 present ($1); use -f to refresh"
+    return 0
+  fi
+  return 1
+}
 mkdir -p "$RES"
 need curl; need tar
 
@@ -79,7 +85,9 @@ setup_bakta() {
     curl -fL "$BAKTA_ZENODO" -o "$t/db.tar.xz"
     tar -xJf "$t/db.tar.xz" -C "$RES"
   fi
-  command -v amrfinder_update >/dev/null && amrfinder_update --force_update --database "$RES/db-light/amrfinderplus-db" || true
+  if command -v amrfinder_update >/dev/null; then
+    amrfinder_update --force_update --database "$RES/db-light/amrfinderplus-db" || true
+  fi
   rm -rf "$t"
 }
 
