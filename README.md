@@ -138,6 +138,7 @@ All defaults live in `nextflow.config` and can be overridden on the command line
 | `samples` | `config/samples.tsv` | Sample manifest |
 | `results` | `results` | Output directory |
 | `threads` | `10` | CPUs per process |
+| `delete_intermediates` | `true` | Delete reads and assembler/BUSCO/Bakta scratch dirs once consumed to save disk. Side effect: `-resume` re-runs `FETCH_SRA`/`FASTP` |
 | `target_gene` | `blaCTX-M-15` | Gene flagged in the cohort summary |
 | `card_json`, `resfinder_db`, `busco_db` | under `resources/` | Database locations |
 | `genome_size` | `5.5M` | Expected genome size given to Shovill (`--gsize`, paired-end only) |
@@ -174,7 +175,7 @@ python workflow/scripts/validate_assemblies.py {filter-one,promote,build-summary
 python workflow/scripts/amr_screening.py {rgi,resfinder,parse-hits} --help
 python workflow/scripts/fetch_genomes.py --help
 python workflow/scripts/make_multiqc_custom.py --help
-python workflow/scripts/parse_selection_results.py --help
+python workflow/scripts/parse_selection_results.py --help   # not used by main.nf yet
 ```
 
 > `config/config.yaml` also holds settings for downstream steps (phylogenomics, selection analysis) that `main.nf` does not run yet. Parameters that `main.nf` consumes come from `nextflow.config`.
@@ -188,14 +189,14 @@ To test the pipeline with the provided example manifest (`config/samples.tsv`):
    - `results/06_metadata/cohort_metadata_summary.tsv`
    - `results/06_metadata/cohort_metadata_summary.xlsx`
 
-You can compare your results with our expected output. We provide reference output files in `results/expected_output/` for pipeline output validation.
+You can compare your results with our expected output. We provide reference output files in `results/expected_output/` for pipeline output validation: `cohort_metadata_summary.{tsv,xlsx}` and the IQ-TREE tree (`iqtree.treefile`) for the 10-sample `config/samples.tsv`. Assembly-derived columns (contig counts, lengths, coverage) can vary slightly between runs, so compare QC status and `blaCTX-M-15` calls rather than exact values.
+
 ## Outputs
 
 | Directory | Contents |
 |---|---|
-| `results/00_raw_reads/` | Raw FASTQ files |
-| `results/01_qc/fastp/` | Trimmed FASTQs (`*_R1/R2.paired.fastq.gz` for PE, `*_R1.trimmed.fastq.gz` for SE) plus per-sample fastp HTML and JSON reports |
-| `results/01_qc/multiqc/` | `multiqc_report.html` and `multiqc_data/` (fastp, BUSCO, assembly QC, target-gene hits) |
+| `results/01_qc/fastp/` | Per-sample fastp HTML and JSON reports (raw and trimmed reads are intermediates and are not published) |
+| `results/01_qc/multiqc/` | `multiqc_report.html` and `multiqc_report_data/` (fastp, BUSCO, assembly QC, target-gene hits) |
 | `results/02_assembly/` | Per-sample assemblies and coverage files |
 | `results/03_busco/` | BUSCO short summaries |
 | `results/04_filtered_assemblies/` | Filter status JSON and promoted assemblies |
@@ -207,12 +208,14 @@ You can compare your results with our expected output. We provide reference outp
 | `results/07_phylogenomics/gubbins/` | `gubbins.filtered_polymorphic_sites.fasta` (recombination-filtered SNP alignment), recombination GFF and trees |
 | `results/07_phylogenomics/iqtree/` | `iqtree.treefile` (Newick, with UFBoot support), `iqtree.iqtree` report, log |
 
-Phylogenomics runs on the genomes that pass the Step 04 filter and needs at least `min_phylo_samples` (4) of them; with fewer, those steps are skipped without error.
+Panaroo runs with `--remove-invalid-genes`: Bakta GFF3s contain selenocysteine CDS (formate dehydrogenase, in-frame TGA) that Panaroo otherwise reads as internal stops and aborts with `Invalid gene sequence!`. The IQ-TREE environment is pinned to `iqtree>=2.2,<3` because IQ-TREE 3 no longer ships the `iqtree2` executable that `IQTREE` calls.
+
+Phylogenomics runs on the genomes that pass the Step 04 filter and needs at least `min_phylo_samples` (4) of them; with fewer, those steps are skipped (a warning is logged) without error.
 
 
 ## Citation & License 
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-Please cite Nextflow, fastp, MultiQC, Shovill, SPAdes, BUSCO, RGI/CARD, and ResFinder when publishing results.
+Please cite Nextflow, fastp, MultiQC, Shovill, SKESA, SPAdes, BUSCO, RGI/CARD, ResFinder, Bakta, Panaroo, Gubbins, and IQ-TREE when publishing results.
 

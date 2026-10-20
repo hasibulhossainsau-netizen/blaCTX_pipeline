@@ -144,14 +144,14 @@ def cmd_build_summary(args) -> None:
     records = []
 
     for _, row in samples_df.iterrows():
-        # sample_id হিসেবে 'sample_id' অথবা 'Run' কলাম ব্যবহার করা হচ্ছে
+        # sample id comes from 'sample_id', falling back to the SRA 'Run' column
         raw_sample = row.get("sample_id") if pd.notna(row.get("sample_id")) else row.get("Run")
         sample_id = str(raw_sample).strip() if raw_sample is not None else ""
 
         if not sample_id:
             continue
 
-        # কলাম ম্যাপিং (config/samples.tsv এর কলামগুলোর সাথে নতুন কলামের ম্যাপিং)
+        # column mapping: curated names first, then the SRA RunInfo equivalents
         biosample = row.get("biosample") if pd.notna(row.get("biosample")) else row.get("BioSample", "NA")
         country = row.get("country") if pd.notna(row.get("country")) else row.get("geo_loc_name_country", "NA")
         collection_year = row.get("collection_year") if pd.notna(row.get("collection_year")) else row.get("collection_date", "NA")

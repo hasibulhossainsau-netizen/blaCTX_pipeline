@@ -384,7 +384,7 @@ process PANAROO {
     script:
     """
     panaroo -i ${gffs} -o panaroo_out -t ${task.cpus} \
-        --clean-mode ${params.panaroo_mode} -a core --aligner mafft \
+        --clean-mode ${params.panaroo_mode} --remove-invalid-genes -a core --aligner mafft \
         --core_threshold ${params.panaroo_core_threshold}
     """
 
@@ -488,14 +488,18 @@ workflow {
     BAKTA(passing_assemblies)
     PANAROO(BAKTA.out.gff.map { it[1] }.collect()
         .filter { it.size() >= params.min_phylo_samples })
+    BAKTA.out.gff.count().subscribe { n ->
+        if (n < params.min_phylo_samples)
+            log.warn "Only ${n} genome(s) passed QC (< min_phylo_samples=${params.min_phylo_samples}); skipping PANAROO/GUBBINS/IQTREE"
+    }
     GUBBINS(PANAROO.out.core_aln)
     IQTREE(GUBBINS.out.filtered_aln)
     
     SUMMARY(
         Channel.fromPath(params.samples),
         FILTER_ASSEMBLY.out.status.map { it[1] }.collect(),
-        RGI.out.results.map { it[1] }.collect(),
-        RESFINDER.out.results.map { it[1] }.collect()
+        RGI.out.results.map { it[1] }.collect().ifEmpty([]),
+        RESFINDER.out.results.map { it[1] }.collect().ifEmpty([])
     )
 
     MULTIQC(

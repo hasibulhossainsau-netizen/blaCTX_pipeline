@@ -1,3 +1,11 @@
 sample_id	biosample	country	collection_year	expected_st	source_type	busco_completeness	coverage_x	n_contigs	total_assembly_length	qc_pass	qc_fail_reasons	blaCTX-M-15_rgi_detected	blaCTX-M-15_rgi_identity	blaCTX-M-15_resfinder_detected	blaCTX-M-15_resfinder_identity	blaCTX-M-15_concordant_call
-SRR25276878	SAMN36448984	Bangladesh	2022-10-20	MNH_G2C5F	SRA_PE	98.9	85.89	71	5390038	True	none	False		False		False
-SRR38361580	SAMN57562819	India	2024		SRA_PE	98.6	81.18	78	5518281	True	none	True	100.0	True	100.00	True
+ERR11759336	SAMEA114110082	India	2022		SRA_PE	98.9	91.2	80	5392788	True	none	False		False		False
+ERR11759339	SAMEA114110085	India	2022		SRA_PE	98.6	392.1	42	5373271	True	none	True	100.0	True	100.00	True
+ERR11759340	SAMEA114110086	India	2022		SRA_PE	98.9	307.72	56	5401290	True	none	False		False		False
+ERR11759341	SAMEA114110087	India	2021		SRA_PE	98.9	96.57	100	5226013	True	none	False		False		False
+ERR11759342	SAMEA114110088	India	2021		SRA_PE	98.9	115.34	82	5561800	True	none	False		False		False
+ERR11759343	SAMEA114110089	India	2021		SRA_PE	98.6	308.78	95	5419236	True	none	False		False		False
+ERR11759344	SAMEA114110090	India	2021		SRA_PE	98.9	250.0	54	5531550	True	none	True	100.0	True	100.00	True
+ERR11759345	SAMEA114110091	India	2021		SRA_PE	98.6	89.63	67	5195552	True	none	False		False		False
+SRR4423335	SAMN05908511	Pakistan	2015-06	DA48896	SRA_PE	98.4	56.33	110	5642446	True	none	True	100.0	True	100.00	True
+ERR5685495	SAMEA8515318	Pakistan	2015-17		SRA_PE	98.9	44.21	182	5804927	False	Coverage 44.21x < 50.0x	False		False		False

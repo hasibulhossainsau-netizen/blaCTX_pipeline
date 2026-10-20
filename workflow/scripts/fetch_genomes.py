@@ -16,6 +16,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 logging.basicConfig(
@@ -102,33 +103,26 @@ def fetch_sra_ena_ftp(accession: str, sample_id: str, outdir: Path, layout: str)
 
         ftp_urls = data[0]["fastq_ftp"].split(";")
 
+        # -c / -C - resume a partial file on retry instead of restarting from zero
+        def _download(url: str, out: Path) -> None:
+            if downloader == "wget":
+                run_cmd(["wget", "-q", "-c", "-O", str(out), url])
+            else:
+                run_cmd(["curl", "--fail", "--silent", "--show-error", "-C", "-", "-o", str(out), url])
+
         if layout == "PE" and len(ftp_urls) >= 2:
-            url_1 = f"https://{ftp_urls[0]}"
-            url_2 = f"https://{ftp_urls[1]}"
-
-            def _download_pe():
-                if downloader == "wget":
-                    run_cmd(["wget", "-q", "-O", str(r1_out), url_1])
-                    run_cmd(["wget", "-q", "-O", str(r2_out), url_2])
-                else:
-                    run_cmd(["curl", "--fail", "--silent", "--show-error", "-o", str(r1_out), url_1])
-                    run_cmd(["curl", "--fail", "--silent", "--show-error", "-o", str(r2_out), url_2])
-
-            with_retries(_download_pe)
+            targets = [(f"https://{ftp_urls[0]}", r1_out), (f"https://{ftp_urls[1]}", r2_out)]
+            # R1 and R2 are independent files, so fetch them concurrently
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                futures = [pool.submit(with_retries, _download, url, out) for url, out in targets]
+                for fut in futures:
+                    fut.result()
             if is_valid_file(r1_out) and is_valid_file(r2_out):
                 log.info("ENA PE download successful for %s", accession)
                 return True
 
         elif layout == "SE" and len(ftp_urls) >= 1:
-            url_se = f"https://{ftp_urls[0]}"
-
-            def _download_se():
-                if downloader == "wget":
-                    run_cmd(["wget", "-q", "-O", str(r1_out), url_se])
-                else:
-                    run_cmd(["curl", "--fail", "--silent", "--show-error", "-o", str(r1_out), url_se])
-
-            with_retries(_download_se)
+            with_retries(_download, f"https://{ftp_urls[0]}", r1_out)
             if is_valid_file(r1_out):
                 log.info("ENA SE download successful for %s", accession)
                 return True
