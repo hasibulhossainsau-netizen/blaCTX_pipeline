@@ -209,7 +209,7 @@ To test the pipeline with the provided example manifest (`config/samples.tsv`):
    - `results/06_metadata/cohort_metadata_summary.tsv`
    - `results/06_metadata/cohort_metadata_summary.xlsx`
 
-You can compare your results with our expected output. We provide reference output files in `results/expected_output/` for pipeline output validation: `cohort_metadata_summary.{tsv,xlsx}` and the IQ-TREE tree (`iqtree.treefile`) for the earlier 10-sample, all-paired-end manifest (it no longer matches the bundled `config/samples.tsv`; regenerate it from a real run). Assembly-derived columns (contig counts, lengths, coverage) can vary slightly between runs, so compare QC status and `blaCTX-M-15` calls rather than exact values.
+Reference output from an earlier 10-sample, all-paired-end manifest is archived in `results/expected_output_legacy_10sample/` for reference only; it does not match the bundled `config/samples.tsv`, and a refreshed reference set will be added after a clean full run. Assembly-derived columns (contig counts, lengths, coverage) can vary slightly between runs, so compare QC status and `blaCTX-M-15` calls rather than exact values.
 
 ## Outputs
 

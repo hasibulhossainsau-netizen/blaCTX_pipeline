@@ -5,7 +5,7 @@ results_test/
 resources/
 __pycache__/
 /results/*
-!/results/expected_output/
+!/results/expected_output_legacy_10sample/
 /results_smoke/
 CLAUDE.md
 .singularity_cache/
