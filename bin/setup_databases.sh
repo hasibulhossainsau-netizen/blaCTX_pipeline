@@ -57,7 +57,9 @@ setup_resfinder() {
   done
   # KMA index (needed by ResFinder when run in read mode; harmless for assemblies)
   if command -v kma_index >/dev/null; then
-    (cd db_resfinder && python3 INSTALL.py non_interactive 2>/dev/null || true)
+    if ! (cd db_resfinder && python3 INSTALL.py non_interactive 2>/dev/null); then
+      log "KMA indexing of db_resfinder failed; continuing"
+    fi
   else
     log "kma_index not found; skipping KMA indexing (only required for read-based runs)"
   fi
