@@ -7,3 +7,4 @@ __pycache__/
 /results/*
 !/results/expected_output/
 CLAUDE.md
+.singularity_cache/

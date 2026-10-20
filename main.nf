@@ -457,6 +457,7 @@ workflow {
             }
             tuple(sample, accession, layout)
         }
+        .ifEmpty { error "No samples found in ${params.samples} (header only or empty file)" }
 
     FETCH_SRA(samples_ch)
     // downstream steps only need PE or SE

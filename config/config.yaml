@@ -1,10 +1,12 @@
-# NOTE: reference only. main.nf reads its parameters from nextflow.config; the
-# phylogenomics settings (Panaroo/Gubbins/IQ-TREE) live there, not here. Sections
-# below target_loci are planned selection-analysis steps that are not implemented.
 # =============================================================================
-# Unified config.yaml - Klebsiella pneumoniae AMR Genomics & Phylogenomics Pipeline
+# config.yaml - Klebsiella pneumoniae AMR Genomics & Phylogenomics Pipeline
 # Lead: Md. Hasibul Hossain (Sukanto), SAU Microbiology & Parasitology
 # =============================================================================
+# REFERENCE ONLY: main.nf does NOT read this file. Parameters that drive the
+# pipeline live in nextflow.config (params {}), including the phylogenomics
+# settings (Panaroo/Gubbins/IQ-TREE). Thresholds below are duplicated there and
+# must be kept in sync by hand. Selection analysis is not implemented; its
+# planned settings are kept, commented out, in the "future_work" block at the end.
 
 samples_tsv: "config/samples.tsv"
 results_dir: "results"
@@ -21,7 +23,6 @@ paths:
   amr_resfinder_dir: "results/05_amr/resfinder"
   metadata_dir: "results/06_metadata"
   phylogenomics_dir: "results/07_phylogenomics"
-  selection_dir: "results/09_selection"
   logs_dir: "logs"
 
 databases:
@@ -51,46 +52,53 @@ params:
   entrez_email: "${NCBI_EMAIL}"
   entrez_api_key: "${NCBI_API_KEY}"
 
-target_loci:
-  blaCTX-M-15:
-    query_fasta: "resources/references/blaCTX-M-15.fasta"
-    flank_bp: 500
-    feature_type: "cds"
-  rpoB:
-    query_fasta: "resources/references/rpoB.fasta"
-    flank_bp: 0
-    feature_type: "cds"
-  fusA:
-    query_fasta: "resources/references/fusA.fasta"
-    flank_bp: 0
-    feature_type: "cds"
-  ompK35:
-    query_fasta: "resources/references/ompK35.fasta"
-    flank_bp: 0
-    feature_type: "cds"
-  ompK36:
-    query_fasta: "resources/references/ompK36.fasta"
-    flank_bp: 0
-    feature_type: "cds"
 
-codon_align:
-  method: "macse"
-  threads: 8
-
-codeml:
-  binary: "codeml"
-  models: ["M0", "M1a", "M2a", "M7", "M8"]
-  seqtype: 1
-  runmode: 0
-  cleandata: 1
-
-hyphy:
-  binary: "hyphy"
-  methods: ["SLAC", "MEME"]
-  slac_pvalue: 0.1
-  meme_pvalue: 0.1
-
-selection_thresholds:
-  positive_dnds: 1.0
-  lrt_pvalue: 0.05
-  bayes_eb_posterior: 0.95
+# =============================================================================
+# future_work: NOT IMPLEMENTED (nothing in main.nf or workflow/scripts consumes
+# these). Planned selection analysis: extract target loci -> codon alignment
+# (MACSE) -> CodeML / HyPhy. Uncomment and wire into main.nf when built; the
+# output directory would be results/09_selection.
+# =============================================================================
+# target_loci:
+#   blaCTX-M-15:
+#     query_fasta: "resources/references/blaCTX-M-15.fasta"
+#     flank_bp: 500
+#     feature_type: "cds"
+#   rpoB:
+#     query_fasta: "resources/references/rpoB.fasta"
+#     flank_bp: 0
+#     feature_type: "cds"
+#   fusA:
+#     query_fasta: "resources/references/fusA.fasta"
+#     flank_bp: 0
+#     feature_type: "cds"
+#   ompK35:
+#     query_fasta: "resources/references/ompK35.fasta"
+#     flank_bp: 0
+#     feature_type: "cds"
+#   ompK36:
+#     query_fasta: "resources/references/ompK36.fasta"
+#     flank_bp: 0
+#     feature_type: "cds"
+#
+# codon_align:
+#   method: "macse"
+#   threads: 8
+#
+# codeml:
+#   binary: "codeml"
+#   models: ["M0", "M1a", "M2a", "M7", "M8"]
+#   seqtype: 1
+#   runmode: 0
+#   cleandata: 1
+#
+# hyphy:
+#   binary: "hyphy"
+#   methods: ["SLAC", "MEME"]
+#   slac_pvalue: 0.1
+#   meme_pvalue: 0.1
+#
+# selection_thresholds:
+#   positive_dnds: 1.0
+#   lrt_pvalue: 0.05
+#   bayes_eb_posterior: 0.95

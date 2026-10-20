@@ -39,8 +39,8 @@ graph TD
 ## Prerequisites
 
 - **OS:** Linux / WSL2 (x86_64)
-- **Nextflow** >= 22.10 (tested with 26.04), which needs Java 11+
-- **Conda or Mamba.** Each process builds its own environment from `workflow/envs/*.yaml` on first use, (including `fastp` and `MultiQC`), so the first run needs internet access and several GB of disk.
+- **Nextflow** >= 26.04.6 (tested with 26.04.6 and latest-stable in CI), which needs Java 17+
+- **Conda or Mamba** (or **Docker / Singularity**, see [Profiles](#profiles)). With conda, each process builds its own environment from `workflow/envs/*.yaml` on first use, (including `fastp` and `MultiQC`), so the first run needs internet access and several GB of disk.
 - **Network access** to ENA/NCBI for read download (`FETCH_SRA`)
 - A free NCBI e-mail (and optionally an API key) for the Entrez fallback
 
@@ -51,12 +51,17 @@ graph TD
 ├── main.nf                    # Nextflow DSL2 workflow
 ├── nextflow.config            # Default params, process directives, profiles
 ├── config/
-│   ├── config.yaml            # Extended project settings and thresholds (reference)
-│   └── samples.tsv            # Sample manifest
+│   ├── config.yaml            # Reference settings/thresholds (not read by main.nf)
+│   ├── README.md              # Manifest column documentation
+│   └── samples.tsv            # Example manifest (5 PE + 3 SE runs)
+├── bin/
+│   └── setup_databases.sh     # Downloads CARD, ResFinder, BUSCO and Bakta into resources/
+├── containers/helper/         # Dockerfile for the python/pandas/sra-tools helper image
 ├── workflow/
 │   ├── envs/                  # Conda environment YAMLs
 │   └── scripts/               # Python utilities (each supports --help)
 ├── resources/                 # Local reference DBs (not tracked in git)
+├── .github/workflows/test.yml # CI: config parsing + `-stub-run` on push/PR
 └── results/                   # Pipeline outputs
 ```
 
@@ -66,7 +71,7 @@ graph TD
    ```bash
    git clone <repo-url> blaCTX_pipeline && cd blaCTX_pipeline
    ```
-2. **Install the reference databases** under `resources/` (see below).
+2. **Install the reference databases** under `resources/`: run `bin/setup_databases.sh` (see below).
 3. **Export NCBI credentials** for read download:
    ```bash
    export NCBI_EMAIL="you@example.org"
@@ -78,6 +83,12 @@ graph TD
    ```
 
 ## Reference databases
+
+Download everything with one command (idempotent; `-f` refreshes, `-d "card busco"` selects, `-r DIR` changes the target):
+
+```bash
+bin/setup_databases.sh
+```
 
 | Resource | Version | Expected path | Override with |
 | :--- | :--- | :--- | :--- |
@@ -106,7 +117,7 @@ resources/
 | `sra_accession` or `Run` | yes | Accession to download |
 | `source_type` | yes | Read layout: `SRA_PE`/`PE` (paired-end) or `SRA_SE`/`SE` (single-end). Anything else stops the run with an error. Paired and single-end samples can be mixed in one manifest |
 
-All other columns (e.g. `geo_loc_name`, `isolation_source`, `HOST`) are carried into the final cohort summary.
+All other columns (e.g. `geo_loc_name`, `isolation_source`, `HOST`) are carried into the final cohort summary. See `config/README.md`. The bundled example lists 8 ENA-verified *K. pneumoniae* runs (5 paired-end, 3 single-end).
 
 ## Running
 
@@ -125,9 +136,17 @@ nextflow run main.nf -profile conda -resume \
 | `conda` | Per-process conda environments (the supported way to run) |
 | `mamba` | Same, resolving environments with mamba (faster) |
 | `micromamba` | Same, using micromamba (when `conda`/`mamba` are not installed) |
+| `docker` | Docker containers (pinned `quay.io/biocontainers` images, set per process in `nextflow.config`) |
+| `singularity` | Singularity/Apptainer containers (same images; cached in `.singularity_cache/`) |
 | `test` | Local executor, 2 CPUs, writes to `results_test/`; combine with `-stub-run` |
 
-Container profiles (Docker/Singularity) are not provided because no pinned images exist for these tools yet.
+**Containers.** Profiles can be combined, e.g. `-profile docker`. Tool images are public biocontainers. `FETCH_SRA`, `FILTER_ASSEMBLY`, `PROMOTE` and `SUMMARY` need pandas/openpyxl/sra-tools, which no biocontainer bundles, so they use a helper image (`--container_helper`, default `ghcr.io/hasibulhossainsau-netizen/blactx-helper:0.1.0`). Build and push it once from `containers/helper/Dockerfile`:
+
+```bash
+docker build -t ghcr.io/<owner>/blactx-helper:0.1.0 containers/helper && docker push ghcr.io/<owner>/blactx-helper:0.1.0
+```
+
+`projectDir` is mounted into the containers; databases passed via `--card_json`, `--resfinder_db`, `--busco_db` or `--bakta_db` from outside the repo need an extra bind mount (`docker.runOptions` / `singularity.runOptions`). The container profiles have not been run end-to-end yet.
 
 ### Parameters
 
@@ -144,6 +163,7 @@ All defaults live in `nextflow.config` and can be overridden on the command line
 | `genome_size` | `5.5M` | Expected genome size given to Shovill (`--gsize`, paired-end only) |
 | `spades_memory` | `8` | Memory limit in GB for SPAdes (single-end assembly) |
 | `bakta_db` | `resources/db-light` | Bakta database directory |
+| `container_helper` | `ghcr.io/hasibulhossainsau-netizen/blactx-helper:0.1.0` | Helper image for pandas/sra-tools steps (docker/singularity profiles only) |
 | `panaroo_mode` | `strict` | Panaroo `--clean-mode` (`strict`, `moderate`, `sensitive`) |
 | `panaroo_core_threshold` | `0.98` | Gene presence fraction defining the core genome |
 | `gubbins_tree_builder` | `fasttree` | Tree builder used inside Gubbins |
@@ -178,7 +198,7 @@ python workflow/scripts/make_multiqc_custom.py --help
 python workflow/scripts/parse_selection_results.py --help   # not used by main.nf yet
 ```
 
-> `config/config.yaml` also holds settings for downstream steps (phylogenomics, selection analysis) that `main.nf` does not run yet. Parameters that `main.nf` consumes come from `nextflow.config`.
+> `config/config.yaml` is a reference file that `main.nf` does not read; the unimplemented selection-analysis settings are commented out under its `future_work` block. Parameters that `main.nf` consumes come from `nextflow.config`.
 
 ## Follow-Along Example & Expected Output
 
@@ -189,7 +209,7 @@ To test the pipeline with the provided example manifest (`config/samples.tsv`):
    - `results/06_metadata/cohort_metadata_summary.tsv`
    - `results/06_metadata/cohort_metadata_summary.xlsx`
 
-You can compare your results with our expected output. We provide reference output files in `results/expected_output/` for pipeline output validation: `cohort_metadata_summary.{tsv,xlsx}` and the IQ-TREE tree (`iqtree.treefile`) for the 10-sample `config/samples.tsv`. Assembly-derived columns (contig counts, lengths, coverage) can vary slightly between runs, so compare QC status and `blaCTX-M-15` calls rather than exact values.
+You can compare your results with our expected output. We provide reference output files in `results/expected_output/` for pipeline output validation: `cohort_metadata_summary.{tsv,xlsx}` and the IQ-TREE tree (`iqtree.treefile`) for the earlier 10-sample, all-paired-end manifest (it no longer matches the bundled `config/samples.tsv`; regenerate it from a real run). Assembly-derived columns (contig counts, lengths, coverage) can vary slightly between runs, so compare QC status and `blaCTX-M-15` calls rather than exact values.
 
 ## Outputs
 
