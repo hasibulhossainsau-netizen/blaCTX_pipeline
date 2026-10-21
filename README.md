@@ -97,6 +97,8 @@ bin/setup_databases.sh
 | **Bakta DB** | v6.0 (full or light) | `resources/db-light` | `--bakta_db` |
 | **BUSCO lineage** | `enterobacterales_odb10` (OrthoDB v10.1) | `resources/busco_db/enterobacterales_odb10` | `--busco_db` |
 
+> **Bakta version is pinned to 1.11.4** (container and conda). Bakta ≥ 1.12 bundles AMRFinderPlus 4.2+, which requires an AMRFinderPlus DB newer than the one inside Bakta DB v6.0 and fails with `amrfinder error! error code: 1`. Bump the image and the DB together.
+
 ```text
 resources/
 ├── busco_db/
@@ -228,7 +230,7 @@ Reference output from an earlier 10-sample, all-paired-end manifest is archived 
 | `results/07_phylogenomics/gubbins/` | `gubbins.filtered_polymorphic_sites.fasta` (recombination-filtered SNP alignment), recombination GFF and trees |
 | `results/07_phylogenomics/iqtree/` | `iqtree.treefile` (Newick, with UFBoot support), `iqtree.iqtree` report, log |
 
-Panaroo runs with `--remove-invalid-genes`: Bakta GFF3s contain selenocysteine CDS (formate dehydrogenase, in-frame TGA) that Panaroo otherwise reads as internal stops and aborts with `Invalid gene sequence!`. The IQ-TREE environment is pinned to `iqtree>=2.2,<3` because IQ-TREE 3 no longer ships the `iqtree2` executable that `IQTREE` calls.
+Panaroo runs with `--remove-invalid-genes`: Bakta GFF3s contain selenocysteine CDS (formate dehydrogenase, in-frame TGA) that Panaroo otherwise reads as internal stops and aborts with `Invalid gene sequence!`. Gubbins sets `NUMBA_CACHE_DIR` to a writable directory in the task work dir; otherwise containerised runs fail with `RuntimeError: cannot cache function 'seq_to_int': no locator available`. To make `-resume` reuse results, run with `--delete_intermediates false` (the default `true` removes reads that `FETCH_SRA`/`FASTP` outputs depend on, so every resume re-fetches and re-runs downstream steps). The IQ-TREE environment is pinned to `iqtree>=2.2,<3` because IQ-TREE 3 no longer ships the `iqtree2` executable that `IQTREE` calls.
 
 Phylogenomics runs on the genomes that pass the Step 04 filter and needs at least `min_phylo_samples` (4) of them; with fewer, those steps are skipped (a warning is logged) without error.
 

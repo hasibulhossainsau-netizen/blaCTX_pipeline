@@ -408,6 +408,8 @@ process GUBBINS {
 
     script:
     """
+    export NUMBA_CACHE_DIR=\$PWD/.numba
+    mkdir -p \$NUMBA_CACHE_DIR
     run_gubbins.py --prefix gubbins --threads ${task.cpus} \
         --tree-builder ${params.gubbins_tree_builder} --iterations ${params.gubbins_iterations} \
         ${core_aln}
