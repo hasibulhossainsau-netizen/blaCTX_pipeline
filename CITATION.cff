@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this pipeline, please cite it as below."
+title: "blaCTX_pipeline: Nextflow workflow for Klebsiella pneumoniae assembly QC, blaCTX-M-15 AMR screening and phylogenomics"
+type: software
+authors:
+  - family-names: "Hossain"
+    given-names: "Md Hasibul"
+    email: "hasibul.hossain.sau@gmail.com"
+    orcid: 'https://orcid.org/0009-0001-5975-227X'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23556576
+doi: 10.5281/zenodo.23556576
+repository-code: "https://github.com/hasibulhossainsau-netizen/blaCTX_pipeline"
+license: MIT
+date-released: "2026-10-22"
+keywords:
+  - nextflow
+  - Klebsiella pneumoniae
+  - antimicrobial resistance
+  - blaCTX-M-15
+  - genomics
+  - phylogenomics
