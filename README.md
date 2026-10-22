@@ -60,7 +60,7 @@ Use `-profile conda` instead of `docker` if you prefer conda environments.
 | `singularity` | Same images via Singularity/Apptainer |
 | `test` | 2 CPUs, writes to `results_test/`; combine with `-stub-run` |
 
-The helper image (`--container_helper`, built from `containers/helper/Dockerfile`) provides pandas/openpyxl/sra-tools for the Python steps. Databases stored outside the repo need an extra bind mount via `docker.runOptions` / `singularity.runOptions`.
+
 
 ## Input
 
